@@ -154,7 +154,7 @@ graph LR
     SRC --> DC
 ```
 
-#### [NEW] [devcontainer.json](file:///media/MasterBait/code/SEM3/blockchain/course-project/code/.devcontainer/devcontainer.json)
+#### [NEW] [devcontainer.json](./.devcontainer/devcontainer.json)
 
 - Uses `docker-compose.yml` for multi-container orchestration
 - Main service: `workspace` (Node.js 22, the dev container VS Code connects to)
@@ -163,7 +163,7 @@ graph LR
 - `postCreateCommand`: `cd contracts && npm install && cd ../frontend && npm install`
 - Forward ports: `3000` (Next.js), `8545` (Hardhat node)
 
-#### [NEW] [docker-compose.yml](file:///media/MasterBait/code/SEM3/blockchain/course-project/code/.devcontainer/docker-compose.yml)
+#### [NEW] [docker-compose.yml](./.devcontainer/docker-compose.yml)
 
 Two services:
 
@@ -183,7 +183,7 @@ Two services:
 
 The single smart contract uses **ERC-1155** (multi-token standard) where each `bookId` is a token ID and each copy is a unit of that token. This is more gas-efficient than ERC-721 since multiple copies share one token ID.
 
-#### [NEW] [BookPlatform.sol](file:///media/MasterBait/code/SEM3/blockchain/course-project/code/contracts/contracts/BookPlatform.sol)
+#### [NEW] [BookPlatform.sol](./contracts/contracts/BookPlatform.sol)
 
 **Storage structures:**
 ```solidity
@@ -239,20 +239,20 @@ Seller receives = 60% of Total
 
 ---
 
-#### [NEW] [hardhat.config.js](file:///media/MasterBait/code/SEM3/blockchain/course-project/code/contracts/hardhat.config.js)
+#### [NEW] [hardhat.config.js](./contracts/hardhat.config.js)
 
 - Hardhat config with Solidity 0.8.20+
 - Networks: `hardhat-node` (Docker service at `http://hardhat-node:8545`) and `sepolia` (via Alchemy/Infura RPC)
 - Falls back to `localhost:8545` when not running in devcontainer
 - Environment variables for private key and RPC URL
 
-#### [NEW] [deploy.js](file:///media/MasterBait/code/SEM3/blockchain/course-project/code/contracts/scripts/deploy.js)
+#### [NEW] [deploy.js](./contracts/scripts/deploy.js)
 
 - Deploys `BookPlatform.sol`
 - Logs deployed address
 - Saves ABI + address to `frontend/src/lib/` for frontend consumption
 
-#### [NEW] [BookPlatform.test.js](file:///media/MasterBait/code/SEM3/blockchain/course-project/code/contracts/test/BookPlatform.test.js)
+#### [NEW] [BookPlatform.test.js](./contracts/test/BookPlatform.test.js)
 
 Comprehensive tests covering:
 - Book creation with single and multiple authors
@@ -267,7 +267,7 @@ Comprehensive tests covering:
 
 ### Frontend — Next.js Application
 
-#### [NEW] [WalletContext.js](file:///media/MasterBait/code/SEM3/blockchain/course-project/code/frontend/src/contexts/WalletContext.js)
+#### [NEW] [WalletContext.js](./frontend/src/contexts/WalletContext.js)
 
 React context for MetaMask wallet connection:
 - `connectWallet()` — requests MetaMask accounts
@@ -276,33 +276,33 @@ React context for MetaMask wallet connection:
 - Auto-detect account/chain changes
 - Network validation (ensure correct chain)
 
-#### [NEW] [contract.js](file:///media/MasterBait/code/SEM3/blockchain/course-project/code/frontend/src/lib/contract.js)
+#### [NEW] [contract.js](./frontend/src/lib/contract.js)
 
 - Exports contract ABI and deployed address
 - Helper to get contract instance from signer
 - Read-only contract instance from provider
 
-#### [NEW] [pinata.js](file:///media/MasterBait/code/SEM3/blockchain/course-project/code/frontend/src/lib/pinata.js)
+#### [NEW] [pinata.js](./frontend/src/lib/pinata.js)
 
 - `uploadEncryptedPDF(encryptedBuffer)` → returns IPFS hash
 - `uploadMetadata(bookMetadata)` → returns IPFS metadata URI
 - Uses Pinata API with JWT auth
 
-#### [NEW] [encryption.js](file:///media/MasterBait/code/SEM3/blockchain/course-project/code/frontend/src/lib/encryption.js)
+#### [NEW] [encryption.js](./frontend/src/lib/encryption.js)
 
 - `generateKey()` → generates random AES-256-GCM key
 - `encryptPDF(pdfBuffer, key)` → returns encrypted buffer + IV
 - `decryptPDF(encryptedBuffer, key, iv)` → returns decrypted PDF buffer
 - Uses the native Web Crypto API (`crypto.subtle`)
 
-#### [NEW] [page.js (Home/Marketplace)](file:///media/MasterBait/code/SEM3/blockchain/course-project/code/frontend/src/app/page.js)
+#### [NEW] [page.js (Home/Marketplace)](./frontend/src/app/page.js)
 
 - Displays all available books as cards
 - Each card shows: cover, title, author(s), price (ETH), copies remaining
 - "Buy" button triggers MetaMask transaction
 - Search/filter functionality
 
-#### [NEW] [publish/page.js](file:///media/MasterBait/code/SEM3/blockchain/course-project/code/frontend/src/app/publish/page.js)
+#### [NEW] [publish/page.js](./frontend/src/app/publish/page.js)
 
 Author publish flow:
 1. Fill form: title, description, price, max copies, cover image
@@ -312,7 +312,7 @@ Author publish flow:
 5. Call `createBook()` on smart contract
 6. Store encryption key server-side (mapped to bookId)
 
-#### [NEW] [book/[id]/page.js](file:///media/MasterBait/code/SEM3/blockchain/course-project/code/frontend/src/app/book/[id]/page.js)
+#### [NEW] [book/[id]/page.js](./frontend/src/app/book/[id]/page.js)
 
 Book detail page:
 - Full book info from contract + IPFS metadata
@@ -321,13 +321,13 @@ Book detail page:
 - "Read" button (if owned → navigates to reader)
 - Copies sold / remaining
 
-#### [NEW] [library/page.js](file:///media/MasterBait/code/SEM3/blockchain/course-project/code/frontend/src/app/library/page.js)
+#### [NEW] [library/page.js](./frontend/src/app/library/page.js)
 
 - Lists all NFTs owned by connected wallet
 - "Read" and "List for Resale" buttons on each
 - Shows resale status if already listed
 
-#### [NEW] [read/[bookId]/page.js](file:///media/MasterBait/code/SEM3/blockchain/course-project/code/frontend/src/app/read/[bookId]/page.js)
+#### [NEW] [read/[bookId]/page.js](./frontend/src/app/read/[bookId]/page.js)
 
 Protected PDF reader:
 1. User signs a message: `"Verify ownership of book #X at timestamp Y"`
@@ -337,14 +337,14 @@ Protected PDF reader:
 5. Frontend decrypts PDF in memory, renders via `react-pdf`
 6. Anti-piracy: no download button, right-click disabled, print disabled, CSS `user-select: none`
 
-#### [NEW] [resale/page.js](file:///media/MasterBait/code/SEM3/blockchain/course-project/code/frontend/src/app/resale/page.js)
+#### [NEW] [resale/page.js](./frontend/src/app/resale/page.js)
 
 Resale marketplace:
 - Shows all active resale listings
 - Buy button triggers `buyResale()` transaction
 - Sellers can cancel their listings
 
-#### [NEW] [route.js (API: decrypt-key)](file:///media/MasterBait/code/SEM3/blockchain/course-project/code/frontend/src/app/api/decrypt-key/route.js)
+#### [NEW] [route.js (API: decrypt-key)](./frontend/src/app/api/decrypt-key/route.js)
 
 Next.js API route for access control:
 1. Receives: `{ bookId, signature, message, walletAddress }`
@@ -411,7 +411,6 @@ sequenceDiagram
 
 **Smart Contract Tests** — run with:
 ```bash
-cd /media/MasterBait/code/SEM3/blockchain/course-project/code/contracts
 npx hardhat test
 ```
 
