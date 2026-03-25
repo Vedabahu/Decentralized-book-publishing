@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import WalletButton from "./WalletButton";
 
 type NavItem = {
   label: string;
@@ -36,7 +37,7 @@ export default function Navbar() {
           BookChain
         </Link>
 
-        <div className="flex w-full flex-wrap items-center justify-start gap-2 sm:w-auto sm:justify-end">
+        <div className="flex w-full flex-wrap items-center justify-start gap-2 sm:w-auto sm:justify-end sm:gap-3">
           {navItems.map((item) => {
             const isActive = isActivePath(pathname, item.href);
 
@@ -55,6 +56,10 @@ export default function Navbar() {
               </Link>
             );
           })}
+
+          <div className="ml-0 sm:ml-2">
+            <WalletButton />
+          </div>
         </div>
       </nav>
     </header>
