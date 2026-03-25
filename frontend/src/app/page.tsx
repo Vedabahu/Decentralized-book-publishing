@@ -70,6 +70,7 @@ export default function HomePage() {
           {books.map((book) => (
             <BookCard
               key={book.id}
+              bookId={book.id}
               title={book.title}
               author={book.author}
               price={book.price}
