@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Navbar from "../components/Navbar";
-import { OwnershipProvider } from "../contexts/OwnershipContext";
+import ToastViewport from "../components/ToastViewport";
+import { AppProvider } from "../contexts/AppContext";
+import { ToastProvider } from "../contexts/ToastContext";
 import { WalletProvider } from "../contexts/WalletContext";
 import "./globals.css";
 
@@ -31,12 +33,15 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} antialiased`}
     >
       <body>
-        <WalletProvider>
-          <OwnershipProvider>
-            <Navbar />
-            <main className="pt-20">{children}</main>
-          </OwnershipProvider>
-        </WalletProvider>
+        <AppProvider>
+          <WalletProvider>
+            <ToastProvider>
+              <Navbar />
+              <main className="pt-24 pb-6">{children}</main>
+              <ToastViewport />
+            </ToastProvider>
+          </WalletProvider>
+        </AppProvider>
       </body>
     </html>
   );

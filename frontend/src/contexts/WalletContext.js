@@ -37,8 +37,7 @@ export function WalletProvider({ children }) {
 
   const connectWallet = async () => {
     if (typeof window === "undefined" || !window.ethereum) {
-      alert("MetaMask is not installed. Please install it to continue.");
-      return;
+      return { success: false, reason: "missing_wallet" };
     }
 
     try {
@@ -47,8 +46,15 @@ export function WalletProvider({ children }) {
       });
 
       await syncWalletState(accounts);
+      return { success: true, account: accounts?.[0] ?? null };
     } catch (error) {
       console.error("Wallet connection failed:", error);
+      const code = error?.code ?? error?.info?.error?.code;
+      if (code === 4001 || code === "ACTION_REJECTED") {
+        return { success: false, reason: "cancelled" };
+      }
+
+      return { success: false, reason: "failed" };
     }
   };
 

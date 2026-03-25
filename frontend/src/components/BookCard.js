@@ -1,15 +1,26 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useOwnership } from "../contexts/OwnershipContext";
+import { useApp } from "../contexts/AppContext";
+import { useToast } from "../contexts/ToastContext";
 import { buyBookWithEth } from "../lib/purchase";
 
-export default function BookCard({ bookId, title, author, price, image }) {
+export default function BookCard({
+  bookId,
+  title,
+  author,
+  price,
+  image,
+  totalCopies = 0,
+  soldCopies = 0,
+}) {
   const router = useRouter();
-  const { addOwnedBook, isBookOwned } = useOwnership();
-  const isOwned = isBookOwned(bookId);
+  const { ownedBooks, buyBook } = useApp();
+  const { showToast } = useToast();
+  const isOwned = ownedBooks.includes(String(bookId));
   const [isBuying, setIsBuying] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [statusType, setStatusType] = useState("idle");
@@ -22,23 +33,28 @@ export default function BookCard({ bookId, title, author, price, image }) {
     setStatusMessage("");
     setStatusType("loading");
     setIsBuying(true);
-    const result = await buyBookWithEth(id, price);
+    const result = await buyBookWithEth(id, price, {
+      onStatus: (message) => {
+        setStatusType("loading");
+        setStatusMessage(message);
+      },
+    });
 
     if (result.success) {
-      addOwnedBook(id);
+      buyBook(id);
       setStatusType("success");
-      setStatusMessage(
-        result.demoMode ? "Demo mode: Book purchased successfully" : "Purchase successful!",
-      );
-    } else if (result.cancelled) {
-      setStatusType("error");
-      setStatusMessage("Transaction cancelled");
+      const successMessage = result.message || "Transaction sent";
+      setStatusMessage(successMessage);
+      showToast({ message: successMessage, type: "success" });
     } else if (result.insufficientFunds) {
       setStatusType("error");
-      setStatusMessage("Insufficient funds in wallet");
+      setStatusMessage("Not enough ETH in wallet");
+      showToast({ message: "Not enough ETH in wallet", type: "error" });
     } else {
+      const errorMessage = result.message || "Purchase failed";
       setStatusType("error");
-      setStatusMessage("Purchase failed");
+      setStatusMessage(errorMessage);
+      showToast({ message: errorMessage, type: "error" });
     }
 
     setIsBuying(false);
@@ -50,10 +66,12 @@ export default function BookCard({ bookId, title, author, price, image }) {
 
   return (
     <article className="group w-full max-w-sm overflow-hidden rounded-3xl border border-slate-200/80 bg-white/90 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl">
-      <div className="aspect-[4/5] w-full overflow-hidden bg-slate-100">
-        <img
-          src={image}
+      <div className="relative aspect-[4/5] w-full overflow-hidden bg-slate-100">
+        <Image
+          src={image || "/bitcoin.jpg"}
           alt={`${title} cover`}
+          fill
+          sizes="(max-width: 640px) 100vw, 320px"
           className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
         />
       </div>
@@ -64,6 +82,9 @@ export default function BookCard({ bookId, title, author, price, image }) {
         </h3>
         <p className="text-sm text-slate-600 sm:text-base">{author}</p>
         <p className="text-base font-semibold text-slate-900 sm:text-lg">{price} ETH</p>
+        <p className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
+          Sold: {soldCopies} / {totalCopies}
+        </p>
 
         <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
           <Link
@@ -107,7 +128,11 @@ export default function BookCard({ bookId, title, author, price, image }) {
         {statusMessage && (
           <p
             className={`text-sm ${
-              statusType === "success" ? "text-emerald-700" : "text-red-600"
+              statusType === "success"
+                ? "text-emerald-700"
+                : statusType === "loading"
+                  ? "text-slate-600"
+                  : "text-red-600"
             }`}
           >
             {statusMessage}

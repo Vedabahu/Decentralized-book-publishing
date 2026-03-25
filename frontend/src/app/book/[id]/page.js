@@ -3,27 +3,55 @@
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { useOwnership } from "../../../contexts/OwnershipContext";
+import { useApp } from "../../../contexts/AppContext";
+import { useToast } from "../../../contexts/ToastContext";
 import { buyBookWithEth } from "../../../lib/purchase";
 
 export default function BookDetailPage() {
   const params = useParams();
   const router = useRouter();
   const bookId = params?.id ?? "1";
-  const { addOwnedBook, isBookOwned } = useOwnership();
-  const isOwned = isBookOwned(bookId);
+  const { books, ownedBooks, buyBook } = useApp();
+  const { showToast } = useToast();
+  const isOwned = ownedBooks.includes(String(bookId));
   const [isBuying, setIsBuying] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("info");
 
-  const book = {
-    id: Number(bookId),
-    title: "Blockchain Basics",
-    description: "Learn blockchain fundamentals",
-    authors: ["Alice", "Bob"],
-    price: "0.01",
-    image: "/book1.jpg",
+  const book =
+    books.find((currentBook) => String(currentBook.id) === String(bookId)) ?? {
+      id: Number(bookId),
+      title: "Blockchain Basics",
+      description: "Learn blockchain fundamentals",
+      authors: ["Alice", "Bob"],
+      price: "0.01",
+      image: "/book1.jpg",
+      totalCopies: 0,
+      soldCopies: 45,
+    };
+
+  const totalCopies = book.totalCopies ?? 0;
+  const soldCopies = book.soldCopies ?? 0;
+  const shortenWallet = (wallet) => {
+    if (!wallet) {
+      return "Unknown";
+    }
+
+    return `${wallet.slice(0, 4)}...${wallet.slice(-2)}`;
   };
+
+  const authorRows = (book.authors ?? [book.author ?? "Unknown"]).map((author) => {
+    if (typeof author === "string") {
+      return { name: author, royalty: null };
+    }
+
+    return {
+      name: author.name || shortenWallet(author.wallet),
+      royalty: author.royalty ?? null,
+    };
+  });
+
+  const equalRoyalty = authorRows.length > 0 ? (100 / authorRows.length).toFixed(0) : "0";
 
   const handleBuy = async () => {
     if (isBuying) {
@@ -32,26 +60,30 @@ export default function BookDetailPage() {
 
     setIsBuying(true);
     setMessage("");
+    setMessageType("info");
 
-    const result = await buyBookWithEth(bookId, book.price);
+    const result = await buyBookWithEth(bookId, book.price, {
+      onStatus: (statusMessage) => {
+        setMessageType("info");
+        setMessage(statusMessage);
+      },
+    });
 
     if (result.success) {
-      addOwnedBook(bookId);
+      buyBook(bookId);
       setMessageType("success");
-      setMessage(
-        result.demoMode
-          ? "Demo mode: Book purchased successfully"
-          : "Purchase successful. You now own this book.",
-      );
-    } else if (result.cancelled) {
-      setMessageType("error");
-      setMessage("Transaction cancelled");
+      const successMessage = result.message || "Transaction sent";
+      setMessage(successMessage);
+      showToast({ message: successMessage, type: "success" });
     } else if (result.insufficientFunds) {
       setMessageType("error");
-      setMessage("Insufficient funds in wallet");
+      setMessage("Not enough ETH in wallet");
+      showToast({ message: "Not enough ETH in wallet", type: "error" });
     } else {
+      const errorMessage = result.message || "Purchase failed";
       setMessageType("error");
-      setMessage("Purchase failed");
+      setMessage(errorMessage);
+      showToast({ message: errorMessage, type: "error" });
     }
 
     setIsBuying(false);
@@ -92,13 +124,26 @@ export default function BookDetailPage() {
                 Authors
               </h2>
               <ul className="space-y-1 text-slate-700">
-                {book.authors.map((author) => (
-                  <li key={author}>{author}</li>
+                {authorRows.map((author) => (
+                  <li key={author.name} className="flex items-center justify-between gap-3">
+                    <span>{author.name}</span>
+                    <span className="text-sm font-semibold text-slate-600">
+                      {author.royalty ?? equalRoyalty}%
+                    </span>
+                  </li>
                 ))}
               </ul>
             </div>
 
             <p className="text-xl font-semibold text-slate-900">{book.price} ETH</p>
+            <div className="space-y-1 rounded-xl border border-slate-200 bg-white/80 p-3 text-sm text-slate-700">
+              <p>
+                Total Copies: <span className="font-semibold text-slate-900">{totalCopies}</span>
+              </p>
+              <p>
+                Sold: <span className="font-semibold text-slate-900">{soldCopies}</span>
+              </p>
+            </div>
 
             <div className="pt-2">
               {isOwned ? (
@@ -128,7 +173,11 @@ export default function BookDetailPage() {
             {message && (
               <p
                 className={`text-sm font-medium ${
-                  messageType === "success" ? "text-emerald-700" : "text-red-600"
+                  messageType === "success"
+                    ? "text-emerald-700"
+                    : messageType === "info"
+                      ? "text-slate-600"
+                      : "text-red-600"
                 }`}
               >
                 {message}
