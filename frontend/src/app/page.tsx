@@ -1,3 +1,8 @@
+"use client";
+
+import { useState } from "react";
+import { getContract } from "../lib/contract";
+
 export function PagePlaceholder({
   title,
   subtitle,
@@ -23,10 +28,42 @@ export function PagePlaceholder({
 }
 
 export default function HomePage() {
+  const [message, setMessage] = useState("");
+
+  const handleTestContract = async () => {
+    try {
+      const contract = await getContract();
+      console.log("Contract instance:", contract);
+      setMessage("Contract connected");
+    } catch (error) {
+      console.error("Contract connection failed:", error);
+      setMessage("Contract connection failed");
+    }
+  };
+
   return (
-    <PagePlaceholder
-      title="Marketplace"
-      subtitle="A clean placeholder for the decentralized book marketplace."
-    />
+    <main className="flex min-h-screen items-center justify-center px-6 py-16">
+      <section className="w-full max-w-3xl rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--panel)] px-8 py-16 text-center shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur">
+        <p className="text-sm font-medium uppercase tracking-[0.35em] text-slate-500">
+          Phase 1
+        </p>
+        <h1 className="mt-6 text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl">
+          Marketplace
+        </h1>
+        <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-slate-600 sm:text-lg">
+          A clean placeholder for the decentralized book marketplace.
+        </p>
+
+        <button
+          type="button"
+          onClick={handleTestContract}
+          className="mt-8 rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
+        >
+          Test Contract
+        </button>
+
+        {message && <p className="mt-4 text-sm font-medium text-slate-700">{message}</p>}
+      </section>
+    </main>
   );
 }
