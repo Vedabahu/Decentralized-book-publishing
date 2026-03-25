@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { encryptFile, generateKey } from "../../lib/encryption";
+import { uploadFile } from "../../lib/pinata";
 
 export default function PublishPage() {
   const [title, setTitle] = useState("");
@@ -32,7 +34,7 @@ export default function PublishPage() {
     );
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     const nextFieldErrors = {};
@@ -93,16 +95,32 @@ export default function PublishPage() {
       return;
     }
 
-    console.log("Book publish form data:", {
-      title,
-      description,
-      price,
-      maxCopies,
-      authors,
-      file: pdfFile,
-    });
+    try {
+      const encryptionKey = await generateKey();
+      const { encryptedData, iv } = await encryptFile(pdfFile, encryptionKey);
 
-    setSubmitMessage("Book data prepared for publishing");
+      const encryptedFile = new File([encryptedData], `${pdfFile.name}.enc`, {
+        type: "application/octet-stream",
+      });
+      const ipfsHash = await uploadFile(encryptedFile);
+
+      console.log("Encryption key:", encryptionKey);
+      console.log("Encrypted file:", { encryptedData, iv });
+      console.log("Fake IPFS hash:", ipfsHash);
+      console.log("Book publish form data:", {
+        title,
+        description,
+        price,
+        maxCopies,
+        authors,
+        file: pdfFile,
+      });
+
+      setSubmitMessage("File encrypted and uploaded successfully");
+    } catch (error) {
+      console.error("Encryption/upload failed:", error);
+      setSubmitMessage("Failed to encrypt or upload file. Please try again.");
+    }
   };
 
   const handlePdfChange = (event) => {
@@ -291,7 +309,7 @@ export default function PublishPage() {
           {submitMessage && (
             <p
               className={`text-center text-sm font-medium ${
-                submitMessage === "Book data prepared for publishing"
+                submitMessage === "File encrypted and uploaded successfully"
                   ? "text-emerald-700"
                   : "text-red-600"
               }`}
