@@ -1,35 +1,51 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { getContract } from "../lib/contract";
+import { useOwnership } from "../contexts/OwnershipContext";
+import { buyBookWithEth } from "../lib/purchase";
 
 export default function BookCard({ bookId, title, author, price, image }) {
+  const router = useRouter();
+  const { addOwnedBook, isBookOwned } = useOwnership();
+  const isOwned = isBookOwned(bookId);
   const [isBuying, setIsBuying] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [statusType, setStatusType] = useState("idle");
 
   const handleBuy = async (id) => {
-    if (isBuying || statusType === "success") {
+    if (isBuying || isOwned) {
       return;
     }
 
     setStatusMessage("");
     setStatusType("loading");
     setIsBuying(true);
-    try {
-      const contract = await getContract();
-      const tx = await contract.buyBook(id);
-      await tx.wait();
+    const result = await buyBookWithEth(id, price);
+
+    if (result.success) {
+      addOwnedBook(id);
       setStatusType("success");
-      setStatusMessage("Purchase successful!");
-    } catch (error) {
-      console.error("Buy transaction failed. Falling back to simulation:", error);
-      setStatusType("success");
-      setStatusMessage("Simulated purchase success");
-    } finally {
-      setIsBuying(false);
+      setStatusMessage(
+        result.demoMode ? "Demo mode: Book purchased successfully" : "Purchase successful!",
+      );
+    } else if (result.cancelled) {
+      setStatusType("error");
+      setStatusMessage("Transaction cancelled");
+    } else if (result.insufficientFunds) {
+      setStatusType("error");
+      setStatusMessage("Insufficient funds in wallet");
+    } else {
+      setStatusType("error");
+      setStatusMessage("Purchase failed");
     }
+
+    setIsBuying(false);
+  };
+
+  const handleRead = () => {
+    router.push(`/read/${bookId}`);
   };
 
   return (
@@ -57,27 +73,35 @@ export default function BookCard({ bookId, title, author, price, image }) {
             View Details
           </Link>
 
-          <button
-            type="button"
-            onClick={() => handleBuy(bookId)}
-            disabled={isBuying || statusType === "success"}
-            className={`w-full rounded-full px-4 py-2.5 text-sm font-semibold text-white transition ${
-              statusType === "success"
-                ? "cursor-default bg-emerald-600"
-                : "bg-slate-900 hover:bg-slate-700"
-            } ${isBuying ? "cursor-not-allowed opacity-85" : ""}`}
-          >
-            {isBuying ? (
-              <span className="inline-flex items-center gap-2">
-                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-                Processing...
-              </span>
-            ) : statusType === "success" ? (
-              "Purchased"
-            ) : (
-              "Buy"
-            )}
-          </button>
+          {isOwned ? (
+            <button
+              type="button"
+              onClick={handleRead}
+              className="w-full rounded-full bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-500"
+            >
+              Read
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => handleBuy(bookId)}
+              disabled={isBuying}
+              className={`w-full rounded-full px-4 py-2.5 text-sm font-semibold text-white transition ${
+                isBuying
+                  ? "cursor-not-allowed bg-slate-500 opacity-85"
+                  : "bg-slate-900 hover:bg-slate-700"
+              }`}
+            >
+              {isBuying ? (
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                  Processing...
+                </span>
+              ) : (
+                "Buy"
+              )}
+            </button>
+          )}
         </div>
 
         {statusMessage && (

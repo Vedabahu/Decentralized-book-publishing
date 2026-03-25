@@ -3,13 +3,18 @@
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
+import { useOwnership } from "../../../contexts/OwnershipContext";
+import { buyBookWithEth } from "../../../lib/purchase";
 
 export default function BookDetailPage() {
   const params = useParams();
   const router = useRouter();
   const bookId = params?.id ?? "1";
-  const [isOwned, setIsOwned] = useState(false);
+  const { addOwnedBook, isBookOwned } = useOwnership();
+  const isOwned = isBookOwned(bookId);
+  const [isBuying, setIsBuying] = useState(false);
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("info");
 
   const book = {
     id: Number(bookId),
@@ -20,9 +25,36 @@ export default function BookDetailPage() {
     image: "/book1.jpg",
   };
 
-  const handleBuy = () => {
-    setIsOwned(true);
-    setMessage("Purchase successful. You now own this book.");
+  const handleBuy = async () => {
+    if (isBuying) {
+      return;
+    }
+
+    setIsBuying(true);
+    setMessage("");
+
+    const result = await buyBookWithEth(bookId, book.price);
+
+    if (result.success) {
+      addOwnedBook(bookId);
+      setMessageType("success");
+      setMessage(
+        result.demoMode
+          ? "Demo mode: Book purchased successfully"
+          : "Purchase successful. You now own this book.",
+      );
+    } else if (result.cancelled) {
+      setMessageType("error");
+      setMessage("Transaction cancelled");
+    } else if (result.insufficientFunds) {
+      setMessageType("error");
+      setMessage("Insufficient funds in wallet");
+    } else {
+      setMessageType("error");
+      setMessage("Purchase failed");
+    }
+
+    setIsBuying(false);
   };
 
   const handleRead = () => {
@@ -81,14 +113,27 @@ export default function BookDetailPage() {
                 <button
                   type="button"
                   onClick={handleBuy}
-                  className="rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-slate-700 hover:shadow-lg"
+                  disabled={isBuying}
+                  className={`rounded-full px-6 py-3 text-sm font-semibold text-white shadow-sm transition duration-200 ${
+                    isBuying
+                      ? "cursor-not-allowed bg-slate-500"
+                      : "bg-slate-900 hover:-translate-y-0.5 hover:bg-slate-700 hover:shadow-lg"
+                  }`}
                 >
-                  Buy
+                  {isBuying ? "Processing..." : "Buy"}
                 </button>
               )}
             </div>
 
-            {message && <p className="text-sm font-medium text-emerald-700">{message}</p>}
+            {message && (
+              <p
+                className={`text-sm font-medium ${
+                  messageType === "success" ? "text-emerald-700" : "text-red-600"
+                }`}
+              >
+                {message}
+              </p>
+            )}
           </div>
         </div>
       </section>

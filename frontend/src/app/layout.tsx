@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Navbar from "../components/Navbar";
+import { OwnershipProvider } from "../contexts/OwnershipContext";
 import { WalletProvider } from "../contexts/WalletContext";
 import "./globals.css";
 
@@ -31,8 +32,10 @@ export default function RootLayout({
     >
       <body>
         <WalletProvider>
-          <Navbar />
-          <main className="pt-20">{children}</main>
+          <OwnershipProvider>
+            <Navbar />
+            <main className="pt-20">{children}</main>
+          </OwnershipProvider>
         </WalletProvider>
       </body>
     </html>
