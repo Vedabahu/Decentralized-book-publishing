@@ -1,0 +1,18 @@
+services:
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  ipfs:
+    image: ipfs/kubo
+    container_name: ipfs
+    ports:
+      - "5001:5001"
+      - "8080:8080"
+
+volumes:
+  mongo_data:
