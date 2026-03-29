@@ -30,6 +30,9 @@ contract BookCover is ERC721URIStorage {
     // 🔗 token → book mapping
     mapping(uint256 => uint256) public tokenToBook;
 
+    // Track which tokens have been minted
+    mapping(uint256 => bool) private _tokenExists;
+
     event BookCreated(uint256 bookId, address author);
     event BookPurchased(uint256 bookId, address buyer, uint256 tokenId);
     event BookResold(uint256 tokenId, address from, address to);
@@ -79,6 +82,7 @@ contract BookCover is ERC721URIStorage {
         _setTokenURI(tokenId, book.metadataURI);
 
         tokenToBook[tokenId] = bookId;
+        _tokenExists[tokenId] = true;
 
         // 🔸 Payment split (10% platform, 90% author)
         uint platformCut = (msg.value * platformFeePercent) / 100;
@@ -137,5 +141,31 @@ contract BookCover is ERC721URIStorage {
 
         uint256 bookId = tokenToBook[tokenId];
         return books[bookId].metadataURI;
+    }
+
+    // =========================
+    // OWNERSHIP HELPERS
+    // =========================
+    function hasBoughtBook(address user, uint256 bookId) public view returns (bool) {
+        for (uint256 i = 1; i <= _tokenIds; i++) {
+            if (_tokenExists[i] && tokenToBook[i] == bookId && ownerOf(i) == user) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function getUserTokens(address user) public view returns (uint256[] memory) {
+        uint count = balanceOf(user);
+        uint256[] memory tokens = new uint256[](count);
+        uint index = 0;
+        for (uint256 i = 1; i <= _tokenIds; i++) {
+            if (_tokenExists[i] && ownerOf(i) == user) {
+                tokens[index] = i;
+                index++;
+                if (index == count) break;
+            }
+        }
+        return tokens;
     }
 }
