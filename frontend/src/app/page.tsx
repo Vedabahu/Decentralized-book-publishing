@@ -14,12 +14,12 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 transition-colors duration-300">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl font-heading">
-          Decentralized <span className="text-blue-600">Marketplace</span>
+        <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl font-heading">
+          Decentralized <span className="text-primary">Marketplace</span>
         </h1>
-        <p className="mt-4 max-w-2xl mx-auto text-xl text-gray-500">
+        <p className="mt-4 max-w-2xl mx-auto text-xl text-muted-foreground">
           Discover, purchase, and own books truly through the blockchain.
         </p>
       </div>
@@ -31,7 +31,7 @@ export default function Home() {
       </div>
       
       {books.length === 0 && (
-        <div className="text-center py-20 text-gray-500 text-lg">
+        <div className="text-center py-20 text-muted-foreground text-lg">
           No books available yet. Be the first to publish one!
         </div>
       )}

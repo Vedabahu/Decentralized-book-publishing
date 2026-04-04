@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { connectWallet } from "@/lib/wallet";
 import { getReadonlyUserAuthContract } from "@/lib/contract";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function Header() {
   const [address, setAddress] = useState<string | null>(null);
@@ -81,12 +82,13 @@ export function Header() {
   };
 
   return (
-    <header className="flex flex-wrap justify-between items-center p-4 border-b bg-white shadow-sm z-50 relative">
-      <h1 className="text-2xl font-bold font-heading text-slate-800 tracking-tight">Web3 Bookstore</h1>
+    <header className="flex flex-wrap justify-between items-center p-4 border-b border-border bg-background shadow-sm z-50 relative transition-colors duration-300">
+      <h1 className="text-2xl font-bold font-heading text-foreground tracking-tight">Web3 Bookstore</h1>
+      
       <div className="flex gap-6 items-center flex-wrap mt-2 sm:mt-0">
-        <a href="/" className="text-slate-600 hover:text-blue-600 font-medium transition">Home</a>
-        <a href="/my-books" className="text-slate-600 hover:text-blue-600 font-medium transition">My Books</a>
-        <a href="/author" className="text-slate-600 hover:text-blue-600 font-medium transition">Author Panel</a>
+        <a href="/" className="text-muted-foreground hover:text-primary font-medium transition">Home</a>
+        <a href="/my-books" className="text-muted-foreground hover:text-primary font-medium transition">My Books</a>
+        <a href="/author" className="text-muted-foreground hover:text-primary font-medium transition">Author Panel</a>
         
         {address ? (
           <div className="flex items-center gap-3">
@@ -95,27 +97,29 @@ export function Header() {
                 <img 
                   src={avatarUrl} 
                   alt="User Avatar" 
-                  className="w-10 h-10 rounded-full border border-gray-300 object-cover shadow-sm bg-gray-100"
+                  className="w-10 h-10 rounded-full border border-border object-cover shadow-sm bg-muted"
                 />
                 
-                {/* Comic-style Tooltip */}
-                <span className="absolute top-12 whitespace-nowrap px-3 py-1 bg-white text-black text-xs font-bold border-2 border-black rounded shadow-[2px_2px_0px_rgba(0,0,0,1)] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                {/* Comic-style Tooltip Dark Mode Adjusted */}
+                <span className="absolute top-12 whitespace-nowrap px-3 py-1 bg-card text-card-foreground text-xs font-bold border-2 border-foreground rounded shadow-[2px_2px_0px_var(--color-foreground)] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
                   {userName}
                 </span>
               </div>
             )}
-            <div className="px-4 py-2 bg-blue-100 text-blue-800 rounded-md font-mono text-sm shadow-sm">
+            <div className="px-4 py-2 bg-primary/10 text-primary rounded-md font-mono text-sm shadow-sm">
               {address.slice(0, 6)}...{address.slice(-4)}
             </div>
           </div>
         ) : (
           <button 
             onClick={handleConnect}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md shadow flex-shrink-0 transition"
+            className="px-4 py-2 bg-primary hover:opacity-90 text-primary-foreground font-medium rounded-md shadow flex-shrink-0 transition"
           >
             Connect Wallet
           </button>
         )}
+        
+        <ThemeToggle />
       </div>
     </header>
   );

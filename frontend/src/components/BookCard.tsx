@@ -73,30 +73,30 @@ export function BookCard({ book }: { book: any }) {
   }
 
   return (
-    <div className="border rounded-xl shadow-lg p-4 max-w-sm flex flex-col bg-white overflow-hidden transition-all hover:shadow-2xl hover:-translate-y-1">
-      <div className="h-48 w-full bg-gray-200 overflow-hidden rounded relative">
+    <div className="border border-border rounded-xl shadow-lg p-4 max-w-sm flex flex-col bg-card overflow-hidden transition-all hover:shadow-2xl hover:-translate-y-1">
+      <div className="h-48 w-full bg-muted overflow-hidden rounded relative">
         {imageUrl ? (
           <img src={imageUrl} alt={metadata?.name} className="object-cover w-full h-full" />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-gray-500">Loading cover...</div>
+          <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">Loading cover...</div>
         )}
       </div>
 
       <div className="mt-4 flex flex-col flex-1">
-        <h3 className="font-bold text-xl text-gray-800">{metadata?.name || "Unknown Title"}</h3>
-        <p className="text-sm text-gray-500 mb-4">{metadata?.author || "Author Loading..."}</p>
+        <h3 className="font-bold text-xl text-card-foreground">{metadata?.name || "Unknown Title"}</h3>
+        <p className="text-sm text-muted-foreground mb-4">{metadata?.author || "Author Loading..."}</p>
 
-        <div className="mt-auto flex justify-between items-center border-t pt-4">
-          <span className="font-semibold text-lg text-emerald-600 font-mono">
+        <div className="mt-auto flex justify-between items-center border-t border-border pt-4">
+          <span className="font-semibold text-lg text-emerald-600 dark:text-emerald-400 font-mono">
             {ethers.formatEther(BigInt(book.price || 0))} ETH
           </span>
 
           <button
             onClick={buy}
             disabled={isLoading || isSuccess}
-            className={`px-4 py-2 font-medium rounded-md shadow transition-colors ${isSuccess ? 'bg-green-500 text-white cursor-default' :
-              isLoading ? 'bg-amber-400 text-white cursor-wait' :
-                'bg-blue-600 text-white hover:bg-blue-700 active:scale-95'
+            className={`px-4 py-2 font-medium rounded-md shadow transition-colors ${isSuccess ? 'bg-green-500 text-primary-foreground cursor-default' :
+              isLoading ? 'bg-amber-400 text-primary-foreground cursor-wait' :
+                'bg-primary text-primary-foreground hover:opacity-90 active:scale-95'
               }`}
           >
             {isSuccess ? "Owned" : isLoading ? "Buying..." : "Buy Now"}

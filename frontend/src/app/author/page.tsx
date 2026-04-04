@@ -217,29 +217,29 @@ export default function AuthorPanel() {
   // Registration View
   if (!isRegisteredAuthor) {
     return (
-      <div className="max-w-xl mx-auto mt-10 p-6 bg-white border shadow-md rounded-md">
+      <div className="max-w-xl mx-auto mt-10 p-6 bg-card text-card-foreground border border-border shadow-md rounded-md transition-colors duration-300">
         <h2 className="text-2xl font-bold mb-2">Register as Author</h2>
-        <p className="text-gray-500 mb-6 font-medium">To create and sell books, you must register your Author Profile on the blockchain.</p>
+        <p className="text-muted-foreground mb-6 font-medium">To create and sell books, you must register your Author Profile on the blockchain.</p>
         
-        <form onSubmit={handleRegister} className="flex flex-col gap-4 text-black">
+        <form onSubmit={handleRegister} className="flex flex-col gap-4">
           <input 
             type="text" 
             placeholder="Author Display Name" 
             value={regUsername} 
             onChange={e => setRegUsername(e.target.value)} 
             required
-            className="p-2 border rounded"
+            className="p-2 border border-border bg-background rounded placeholder:text-muted-foreground"
           />
           
           <div className="flex flex-col">
-            <label className="mb-1 text-sm text-gray-700 font-semibold">Profile Avatar (Optional)</label>
+            <label className="mb-1 text-sm text-foreground font-semibold">Profile Avatar (Optional)</label>
             <input 
               type="file" 
               accept="image/*" 
               onChange={e => setAvatarFile(e.target.files?.[0] || null)} 
-              className="p-2 border rounded"
+              className="p-2 border border-border bg-background rounded"
             />
-            <span className="text-xs text-gray-400 mt-1">This will be securely uploaded and pinned to your profile via IPFS.</span>
+            <span className="text-xs text-muted-foreground mt-1">This will be securely uploaded and pinned to your profile via IPFS.</span>
           </div>
 
           <Button 
@@ -252,7 +252,7 @@ export default function AuthorPanel() {
         </form>
         
         {status && (
-          <div className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
+          <div className="mt-6 p-3 bg-secondary/50 border border-secondary rounded text-sm text-secondary-foreground">
             Current Status: {status}
           </div>
         )}
@@ -262,16 +262,16 @@ export default function AuthorPanel() {
 
   // Author Module View
   return (
-    <div className="max-w-xl mx-auto mt-10 p-6 bg-white border shadow-md rounded-md">
+    <div className="max-w-xl mx-auto mt-10 p-6 bg-card text-card-foreground border border-border shadow-md rounded-md transition-colors duration-300">
       <h2 className="text-2xl font-bold mb-4">Publish a New Book</h2>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4 text-black">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input 
           type="text" 
           placeholder="Book Title" 
           value={title} 
           onChange={e => setTitle(e.target.value)} 
           required
-          className="p-2 border rounded"
+          className="p-2 border border-border bg-background rounded placeholder:text-muted-foreground"
         />
         <input 
           type="text" 
@@ -279,7 +279,7 @@ export default function AuthorPanel() {
           value={authorName} 
           onChange={e => setAuthorName(e.target.value)} 
           required
-          className="p-2 border rounded"
+          className="p-2 border border-border bg-background rounded placeholder:text-muted-foreground"
         />
         <input 
           type="number" 
@@ -288,28 +288,28 @@ export default function AuthorPanel() {
           value={price} 
           onChange={e => setPrice(e.target.value)} 
           required
-          className="p-2 border rounded"
+          className="p-2 border border-border bg-background rounded placeholder:text-muted-foreground"
         />
         
         <div className="flex flex-col">
-          <label>Book Cover Image (PNG/JPG)</label>
+          <label className="text-sm font-semibold mb-1">Book Cover Image (PNG/JPG)</label>
           <input 
             type="file" 
             accept="image/*" 
             onChange={e => setImageFile(e.target.files?.[0] || null)} 
             required
-            className="p-2 border rounded"
+            className="p-2 border border-border bg-background rounded"
           />
         </div>
 
         <div className="flex flex-col">
-          <label>Book Document (PDF/EPUB)</label>
+          <label className="text-sm font-semibold mb-1">Book Document (PDF/EPUB)</label>
           <input 
             type="file" 
             accept=".pdf,.epub" 
             onChange={e => setDocFile(e.target.files?.[0] || null)} 
             required
-            className="p-2 border rounded"
+            className="p-2 border border-border bg-background rounded"
           />
         </div>
         
@@ -323,7 +323,7 @@ export default function AuthorPanel() {
       </form>
       
       {status && (
-        <div className="mt-4 p-3 bg-gray-100 rounded text-sm text-gray-700">
+        <div className="mt-4 p-3 bg-secondary/50 border border-secondary rounded text-sm text-secondary-foreground">
           Status: {status}
         </div>
       )}
