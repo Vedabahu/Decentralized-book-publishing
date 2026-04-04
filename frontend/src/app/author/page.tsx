@@ -303,10 +303,10 @@ export default function AuthorPanel() {
         </div>
 
         <div className="flex flex-col">
-          <label className="text-sm font-semibold mb-1">Book Document (PDF/EPUB)</label>
+          <label className="text-sm font-semibold mb-1">Book Document (Strictly PDF)</label>
           <input 
             type="file" 
-            accept=".pdf,.epub" 
+            accept=".pdf" 
             onChange={e => setDocFile(e.target.files?.[0] || null)} 
             required
             className="p-2 border border-border bg-background rounded"

@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { getContract } from "@/lib/contract";
+import { ReaderOverlay } from "@/components/ReaderOverlay";
 
 export default function MyBooks() {
   const [books, setBooks] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [wallet, setWallet] = useState<string | null>(null);
+  const [activeDocUrl, setActiveDocUrl] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchMyBooks() {
@@ -100,20 +102,26 @@ export default function MyBooks() {
                   <p className="text-sm text-muted-foreground mb-4">{metadata?.author || "Author Loading..."}</p>
 
                   <div className="mt-auto border-t border-border pt-4">
-                    <a
-                      href={docUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block text-center px-4 py-2 font-medium rounded-md shadow bg-primary text-primary-foreground hover:opacity-90 active:scale-95 transition-colors"
+                    <button
+                      onClick={() => setActiveDocUrl(docUrl)}
+                      className="block w-full text-center px-4 py-2 font-medium rounded-md shadow bg-primary text-primary-foreground hover:opacity-90 active:scale-95 transition-colors"
                     >
                       Read Book
-                    </a>
+                    </button>
                   </div>
                 </div>
               </div>
             );
           })}
         </div>
+      )}
+
+      {/* Internal Anti-Piracy Full-Screen Reading Protocol */}
+      {activeDocUrl && (
+        <ReaderOverlay 
+          url={activeDocUrl} 
+          onClose={() => setActiveDocUrl(null)} 
+        />
       )}
     </main>
   );
