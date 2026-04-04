@@ -16,18 +16,20 @@ export function Header() {
       if (typeof window !== "undefined" && window.ethereum) {
         const provider = new ethers.BrowserProvider(window.ethereum);
         const userContract = getReadonlyUserAuthContract(provider);
-        
+
         try {
           const userInfo = await userContract.users(walletAddress);
           const userNameVal = userInfo[0];
           const onboarded = userInfo[1];
           const profileUrl = userInfo[3];
-          
+
           if (onboarded) {
             setUserName(userNameVal);
             if (profileUrl) {
               if (profileUrl.startsWith("ipfs://")) {
-                const gateway = process.env.NEXT_PUBLIC_IPFS_GATEWAY || "http://127.0.0.1:8080/ipfs/";
+                const gateway =
+                  process.env.NEXT_PUBLIC_IPFS_GATEWAY ||
+                  "http://127.0.0.1:8080/ipfs/";
                 setAvatarUrl(`${gateway}${profileUrl.replace("ipfs://", "")}`);
               } else {
                 setAvatarUrl(profileUrl);
@@ -56,7 +58,9 @@ export function Header() {
     async function checkConnection() {
       if (typeof window !== "undefined" && window.ethereum) {
         try {
-          const accounts = await window.ethereum.request({ method: "eth_accounts" });
+          const accounts = await window.ethereum.request({
+            method: "eth_accounts",
+          });
           if (accounts.length > 0) {
             setAddress(accounts[0]);
             await fetchUserProfile(accounts[0]);
@@ -83,23 +87,40 @@ export function Header() {
 
   return (
     <header className="flex flex-wrap justify-between items-center p-4 border-b border-border bg-background shadow-sm z-50 relative transition-colors duration-300">
-      <h1 className="text-2xl font-bold font-heading text-foreground tracking-tight">Web3 Bookstore</h1>
-      
+      <h1 className="text-2xl font-bold font-heading text-foreground tracking-tight">
+        Web3 Bookstore
+      </h1>
+
       <div className="flex gap-6 items-center flex-wrap mt-2 sm:mt-0">
-        <a href="/" className="text-muted-foreground hover:text-primary font-medium transition">Home</a>
-        <a href="/my-books" className="text-muted-foreground hover:text-primary font-medium transition">My Books</a>
-        <a href="/author" className="text-muted-foreground hover:text-primary font-medium transition">Author Panel</a>
-        
+        <a
+          href="/"
+          className="text-muted-foreground hover:text-primary font-medium transition"
+        >
+          Home
+        </a>
+        <a
+          href="/my-books"
+          className="text-muted-foreground hover:text-primary font-medium transition"
+        >
+          My Books
+        </a>
+        <a
+          href="/author"
+          className="text-muted-foreground hover:text-primary font-medium transition"
+        >
+          Author Panel
+        </a>
+
         {address ? (
           <div className="flex items-center gap-3">
             {avatarUrl && (
               <div className="relative group cursor-pointer inline-flex justify-center items-center">
-                <img 
-                  src={avatarUrl} 
-                  alt="User Avatar" 
+                <img
+                  src={avatarUrl}
+                  alt="User Avatar"
                   className="w-10 h-10 rounded-full border border-border object-cover shadow-sm bg-muted"
                 />
-                
+
                 {/* Comic-style Tooltip Dark Mode Adjusted */}
                 <span className="absolute top-12 whitespace-nowrap px-3 py-1 bg-card text-card-foreground text-xs font-bold border-2 border-foreground rounded shadow-[2px_2px_0px_var(--color-foreground)] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
                   {userName}
@@ -111,14 +132,14 @@ export function Header() {
             </div>
           </div>
         ) : (
-          <button 
+          <button
             onClick={handleConnect}
             className="px-4 py-2 bg-primary hover:opacity-90 text-primary-foreground font-medium rounded-md shadow flex-shrink-0 transition"
           >
             Connect Wallet
           </button>
         )}
-        
+
         <ThemeToggle />
       </div>
     </header>

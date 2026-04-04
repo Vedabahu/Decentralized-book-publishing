@@ -12,7 +12,9 @@ export async function connectWallet() {
   if (!window.ethereum) throw new Error("No wallet found");
 
   try {
-    const currentChainId = await window.ethereum.request({ method: "eth_chainId" });
+    const currentChainId = await window.ethereum.request({
+      method: "eth_chainId",
+    });
     if (currentChainId !== HARDHAT_CHAIN_ID) {
       try {
         await window.ethereum.request({
@@ -23,12 +25,14 @@ export async function connectWallet() {
         if (switchError.code === 4902) {
           await window.ethereum.request({
             method: "wallet_addEthereumChain",
-            params: [{
-              chainId: HARDHAT_CHAIN_ID,
-              chainName: "Hardhat Localhost",
-              nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
-              rpcUrls: ["http://127.0.0.1:8545/"],
-            }],
+            params: [
+              {
+                chainId: HARDHAT_CHAIN_ID,
+                chainName: "Hardhat Localhost",
+                nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+                rpcUrls: ["http://127.0.0.1:8545/"],
+              },
+            ],
           });
         } else {
           throw switchError;

@@ -10,10 +10,15 @@ export async function POST(req: Request) {
     const author = formData.get("author") as string;
 
     if (!image || !document || !title || !author) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 },
+      );
     }
 
-    const ipfs = create({ url: process.env.NEXT_PUBLIC_IPFS_API_URL || "http://localhost:5001" });
+    const ipfs = create({
+      url: process.env.NEXT_PUBLIC_IPFS_API_URL || "http://localhost:5001",
+    });
 
     const imageRes = await ipfs.add(new Uint8Array(await image.arrayBuffer()));
     const docRes = await ipfs.add(new Uint8Array(await document.arrayBuffer()));
@@ -24,7 +29,7 @@ export async function POST(req: Request) {
       image: `ipfs://${imageRes.path}`,
       document: `ipfs://${docRes.path}`,
     };
-    
+
     const metadataRes = await ipfs.add(JSON.stringify(metadata));
 
     return NextResponse.json({ metadataCID: metadataRes.path });

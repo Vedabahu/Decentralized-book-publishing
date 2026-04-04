@@ -29,7 +29,7 @@ export default function Home() {
           <BookCard key={book.bookId} book={book} />
         ))}
       </div>
-      
+
       {books.length === 0 && (
         <div className="text-center py-20 text-muted-foreground text-lg">
           No books available yet. Be the first to publish one!

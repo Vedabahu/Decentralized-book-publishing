@@ -5,9 +5,12 @@ import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
-const robotoSlabHeading = Roboto_Slab({subsets:['latin'],variable:'--font-heading'});
+const robotoSlabHeading = Roboto_Slab({
+  subsets: ["latin"],
+  variable: "--font-heading",
+});
 
-const oxanium = Oxanium({subsets:['latin'],variable:'--font-sans'});
+const oxanium = Oxanium({ subsets: ["latin"], variable: "--font-sans" });
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,14 +31,27 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", oxanium.variable, robotoSlabHeading.variable)}
+      className={cn(
+        "h-full",
+        "antialiased",
+        geistSans.variable,
+        geistMono.variable,
+        "font-sans",
+        oxanium.variable,
+        robotoSlabHeading.variable,
+      )}
     >
-      <body suppressHydrationWarning className="min-h-full flex flex-col bg-background text-foreground transition-colors duration-300">
-        <ThemeProvider attribute="class" defaultTheme="light" disableTransitionOnChange>
+      <body
+        suppressHydrationWarning
+        className="min-h-full flex flex-col bg-background text-foreground transition-colors duration-300"
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          disableTransitionOnChange
+        >
           <Header />
-          <main className="flex-1 p-4">
-            {children}
-          </main>
+          <main className="flex-1 p-4">{children}</main>
         </ThemeProvider>
       </body>
     </html>

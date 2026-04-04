@@ -6,7 +6,7 @@ export function getContract(signer: ethers.Signer) {
   return new ethers.Contract(
     process.env.NEXT_PUBLIC_BOOK_COVER_ADDRESS!,
     abi.abi,
-    signer
+    signer,
   );
 }
 
@@ -14,7 +14,7 @@ export function getReadonlyContract(provider: ethers.Provider) {
   return new ethers.Contract(
     process.env.NEXT_PUBLIC_BOOK_COVER_ADDRESS!,
     abi.abi,
-    provider
+    provider,
   );
 }
 
@@ -22,7 +22,7 @@ export function getUserAuthContract(signer: ethers.Signer) {
   return new ethers.Contract(
     process.env.NEXT_PUBLIC_USER_AUTH_ADDRESS!,
     userAuthAbi.abi,
-    signer
+    signer,
   );
 }
 
@@ -30,6 +30,6 @@ export function getReadonlyUserAuthContract(provider: ethers.Provider) {
   return new ethers.Contract(
     process.env.NEXT_PUBLIC_USER_AUTH_ADDRESS!,
     userAuthAbi.abi,
-    provider
+    provider,
   );
 }

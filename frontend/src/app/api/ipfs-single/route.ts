@@ -10,7 +10,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing file" }, { status: 400 });
     }
 
-    const ipfs = create({ url: process.env.NEXT_PUBLIC_IPFS_API_URL || "http://localhost:5001" });
+    const ipfs = create({
+      url: process.env.NEXT_PUBLIC_IPFS_API_URL || "http://localhost:5001",
+    });
 
     const res = await ipfs.add(new Uint8Array(await file.arrayBuffer()));
 

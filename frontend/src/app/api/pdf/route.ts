@@ -10,13 +10,13 @@ export async function GET(request: Request) {
 
   try {
     const response = await fetch(url);
-    
+
     if (!response.ok) {
       throw new Error(`Failed to fetch: ${response.statusText}`);
     }
 
     const blob = await response.blob();
-    
+
     return new NextResponse(blob, {
       headers: {
         "Content-Type": "application/pdf",
