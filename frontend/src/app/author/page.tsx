@@ -1,13 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import { create } from "kubo-rpc-client";
 import { Button } from "@/components/ui/button";
 import { connectWallet } from "@/lib/wallet";
-import { getContract } from "@/lib/contract";
+import { getContract, getUserAuthContract } from "@/lib/contract";
 
 export default function AuthorPanel() {
+  // Registration State
+  const [isCheckingRegistration, setIsCheckingRegistration] = useState(true);
+  const [isRegisteredAuthor, setIsRegisteredAuthor] = useState(false);
+  const [walletAddress, setWalletAddress] = useState("");
+  
+  // Register Form State
+  const [regUsername, setRegUsername] = useState("");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [isRegistering, setIsRegistering] = useState(false);
+
+  // Upload Form State
   const [title, setTitle] = useState("");
   const [authorName, setAuthorName] = useState("");
   const [price, setPrice] = useState("");
@@ -16,6 +26,97 @@ export default function AuthorPanel() {
   
   const [isUploading, setIsUploading] = useState(false);
   const [status, setStatus] = useState("");
+
+  useEffect(() => {
+    async function checkRegistration() {
+      try {
+        if (typeof window !== "undefined" && window.ethereum) {
+          const accounts = await window.ethereum.request({ method: "eth_accounts" });
+          if (accounts.length > 0) {
+            setWalletAddress(accounts[0]);
+            
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const userContract = getUserAuthContract(await provider.getSigner());
+            
+            try {
+              // Get user info tuple
+              const userInfo = await userContract.users(accounts[0]);
+              const onboarded = userInfo[1];
+              const userType = userInfo[2];
+              
+              // Check if user is an Author (userType = 1)
+              if (onboarded && Number(userType) === 1) {
+                setIsRegisteredAuthor(true);
+              } else {
+                setIsRegisteredAuthor(false);
+              }
+            } catch (err) {
+              console.error("Contract check failed", err);
+              setIsRegisteredAuthor(false);
+            }
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsCheckingRegistration(false);
+      }
+    }
+    
+    checkRegistration();
+  }, []);
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsRegistering(true);
+    setStatus("Connecting wallet for registration...");
+
+    try {
+      const signer = await connectWallet();
+      const userContract = getUserAuthContract(signer);
+
+      let avatarUrl = "";
+      if (avatarFile) {
+        setStatus("Uploading avatar to IPFS...");
+        const formData = new FormData();
+        formData.append("file", avatarFile);
+
+        const res = await fetch("/api/ipfs-single", {
+          method: "POST",
+          body: formData
+        });
+
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || "Failed to upload avatar");
+        }
+
+        const { cid } = await res.json();
+        avatarUrl = `ipfs://${cid}`;
+      }
+
+      setStatus("Confirming registration transaction...");
+      
+      // setUserInfo(string _username, UserType _usertype, string _profileUrl)
+      // userType 1 = Author
+      const tx = await userContract.setUserInfo(regUsername, 1, avatarUrl);
+      
+      setStatus("Waiting for transaction confirmation...");
+      await tx.wait();
+      
+      setStatus("Successfully registered as Author!");
+      setIsRegisteredAuthor(true);
+      
+      // Auto clear status
+      setTimeout(() => setStatus(""), 3000);
+      
+    } catch (err: any) {
+      console.error(err);
+      setStatus(`Error: ${err.message}`);
+    } finally {
+      setIsRegistering(false);
+    }
+  };
 
   const uploadToIPFS = async () => {
     setStatus("Uploading files to server...");
@@ -91,6 +192,12 @@ export default function AuthorPanel() {
           })
         });
         setStatus("Book successfully published!");
+        
+        // Clear form
+        setTitle("");
+        setPrice("");
+        setImageFile(null);
+        setDocFile(null);
       } else {
         setStatus("Transaction success, but failed to find BookCreated event in logs.");
       }
@@ -103,6 +210,57 @@ export default function AuthorPanel() {
     }
   };
 
+  if (isCheckingRegistration) {
+    return <div className="text-center mt-20 text-lg">Checking wallet registration...</div>;
+  }
+
+  // Registration View
+  if (!isRegisteredAuthor) {
+    return (
+      <div className="max-w-xl mx-auto mt-10 p-6 bg-white border shadow-md rounded-md">
+        <h2 className="text-2xl font-bold mb-2">Register as Author</h2>
+        <p className="text-gray-500 mb-6 font-medium">To create and sell books, you must register your Author Profile on the blockchain.</p>
+        
+        <form onSubmit={handleRegister} className="flex flex-col gap-4 text-black">
+          <input 
+            type="text" 
+            placeholder="Author Display Name" 
+            value={regUsername} 
+            onChange={e => setRegUsername(e.target.value)} 
+            required
+            className="p-2 border rounded"
+          />
+          
+          <div className="flex flex-col">
+            <label className="mb-1 text-sm text-gray-700 font-semibold">Profile Avatar (Optional)</label>
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={e => setAvatarFile(e.target.files?.[0] || null)} 
+              className="p-2 border rounded"
+            />
+            <span className="text-xs text-gray-400 mt-1">This will be securely uploaded and pinned to your profile via IPFS.</span>
+          </div>
+
+          <Button 
+            type="submit" 
+            disabled={isRegistering} 
+            className="bg-primary text-primary-foreground py-2 mt-4 cursor-pointer"
+          >
+            {isRegistering ? "Registering on Blockchain..." : "Complete Registration"}
+          </Button>
+        </form>
+        
+        {status && (
+          <div className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
+            Current Status: {status}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Author Module View
   return (
     <div className="max-w-xl mx-auto mt-10 p-6 bg-white border shadow-md rounded-md">
       <h2 className="text-2xl font-bold mb-4">Publish a New Book</h2>

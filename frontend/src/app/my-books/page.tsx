@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
-import { getReadonlyContract } from "@/lib/contract";
+import { getContract } from "@/lib/contract";
 
 export default function MyBooks() {
   const [books, setBooks] = useState<any[]>([]);
@@ -21,7 +21,8 @@ export default function MyBooks() {
 
           setWallet(accounts[0]);
           const provider = new ethers.BrowserProvider(window.ethereum);
-          const contract = getReadonlyContract(provider);
+          const signer = await provider.getSigner();
+          const contract = getContract(signer);
 
           try {
             // Using the new helper function on the Smart Contract
