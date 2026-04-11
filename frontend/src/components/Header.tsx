@@ -88,7 +88,7 @@ export function Header() {
   return (
     <header className="flex flex-wrap justify-between items-center p-4 border-b border-border bg-background shadow-sm z-50 relative transition-colors duration-300">
       <h1 className="text-2xl font-bold font-heading text-foreground tracking-tight">
-        Web3 Bookstore
+        Open Publish
       </h1>
 
       <div className="flex gap-6 items-center flex-wrap mt-2 sm:mt-0">
