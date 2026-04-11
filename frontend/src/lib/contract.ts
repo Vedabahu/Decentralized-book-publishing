@@ -1,4 +1,7 @@
 import { ethers } from "ethers";
+import { loadContractAddresses } from "./abi-loader";
+
+// Fallback static ABIs (for development without Docker)
 import abi from "../artifacts/contracts/BookCover.sol/BookCover.json";
 import userAuthAbi from "../artifacts/contracts/User.sol/UserAuth.json";
 
@@ -31,5 +34,41 @@ export function getReadonlyUserAuthContract(provider: ethers.Provider) {
     process.env.NEXT_PUBLIC_USER_AUTH_ADDRESS!,
     userAuthAbi.abi,
     provider,
+  );
+}
+
+/**
+ * Dynamically load contract with addresses from shared folder
+ * This is used in Docker environment where addresses are deployed at runtime
+ */
+export async function getContractWithDynamicAddress(
+  signer: ethers.Signer
+) {
+  const addresses = await loadContractAddresses();
+  return new ethers.Contract(addresses.BookCover, abi.abi, signer);
+}
+
+export async function getReadonlyContractWithDynamicAddress(
+  provider: ethers.Provider
+) {
+  const addresses = await loadContractAddresses();
+  return new ethers.Contract(addresses.BookCover, abi.abi, provider);
+}
+
+export async function getUserAuthContractWithDynamicAddress(
+  signer: ethers.Signer
+) {
+  const addresses = await loadContractAddresses();
+  return new ethers.Contract(addresses.UserAuth, userAuthAbi.abi, signer);
+}
+
+export async function getReadonlyUserAuthContractWithDynamicAddress(
+  provider: ethers.Provider
+) {
+  const addresses = await loadContractAddresses();
+  return new ethers.Contract(
+    addresses.UserAuth,
+    userAuthAbi.abi,
+    provider
   );
 }
