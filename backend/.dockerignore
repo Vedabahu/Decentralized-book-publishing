@@ -1,0 +1,12 @@
+node_modules
+cache
+artifacts
+.git
+.gitignore
+README.md
+.env
+.env.local
+*.log
+.next
+dist
+build
