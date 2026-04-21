@@ -1,9 +1,9 @@
 import { ethers } from "ethers";
 import { loadContractAddresses } from "./abi-loader";
 
-// Fallback static ABIs (for development without Docker)
-import abi from "../artifacts/contracts/BookCover.sol/BookCover.json";
-import userAuthAbi from "../artifacts/contracts/User.sol/UserAuth.json";
+// Fallback static ABIs (load from shared artifacts folder mounted by Docker)
+import abi from "../../public/shared/artifacts/contracts/BookCover.sol/BookCover.json";
+import userAuthAbi from "../../public/shared/artifacts/contracts/User.sol/UserAuth.json";
 
 export function getContract(signer: ethers.Signer) {
   return new ethers.Contract(
