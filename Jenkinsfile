@@ -55,7 +55,7 @@ pnpm --version
     }
 
     stage('Deploy System') {
-      agent any
+      agent { label 'built-in' }
       steps {
         sh '''
 echo "Starting deployment..."
