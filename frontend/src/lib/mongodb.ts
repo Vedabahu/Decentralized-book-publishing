@@ -1,28 +1,39 @@
 import { MongoClient } from "mongodb";
 
-const uri = process.env.MONGO_URI!;
+let clientPromise: Promise<MongoClient> | null = null;
 
-let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
-
-if (process.env.NODE_ENV === "development") {
-  // In development mode, use a global variable to preserve the client across HMR.
-  let globalWithMongo = global as typeof globalThis & {
-    _mongoClientPromise?: Promise<MongoClient>;
-  };
-
-  if (!globalWithMongo._mongoClientPromise) {
-    client = new MongoClient(uri);
-    globalWithMongo._mongoClientPromise = client.connect();
+function createClientPromise() {
+  const uri = process.env.MONGO_URI;
+  if (!uri) {
+    throw new Error("MONGO_URI environment variable is not set");
   }
-  clientPromise = globalWithMongo._mongoClientPromise;
-} else {
-  // In production mode, it's best to not use a global variable.
-  client = new MongoClient(uri);
-  clientPromise = client.connect();
+
+  const client = new MongoClient(uri);
+
+  if (process.env.NODE_ENV === "development") {
+    const globalWithMongo = global as typeof globalThis & {
+      _mongoClientPromise?: Promise<MongoClient>;
+    };
+
+    if (!globalWithMongo._mongoClientPromise) {
+      globalWithMongo._mongoClientPromise = client.connect();
+    }
+
+    return globalWithMongo._mongoClientPromise;
+  }
+
+  return client.connect();
 }
 
 export async function getDB() {
+  if (!clientPromise) {
+    clientPromise = createClientPromise();
+  }
+
   const connectedClient = await clientPromise;
-  return connectedClient.db(process.env.DB_NAME);
+  const dbName = process.env.DB_NAME;
+  if (!dbName) {
+    throw new Error("DB_NAME environment variable is not set");
+  }
+  return connectedClient.db(dbName);
 }

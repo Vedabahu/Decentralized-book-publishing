@@ -25,9 +25,14 @@ export async function loadContractAddresses(): Promise<ContractAddresses> {
     // Mounted at public/shared in Docker, so accessible at /shared
     const response = await fetch("/shared/addresses.json");
     if (response.ok) {
-      cachedAddresses = await response.json();
-      console.log("Loaded addresses from shared folder:", cachedAddresses);
-      return cachedAddresses;
+      const loaded = await response.json();
+      if (loaded && loaded.Deployer && loaded.UserAuth && loaded.BookCover) {
+        cachedAddresses = loaded;
+        console.log("Loaded addresses from shared folder:", cachedAddresses);
+        return loaded as ContractAddresses;
+      } else {
+        console.warn("addresses.json is missing required fields or is null, falling back to env variables");
+      }
     }
   } catch (error) {
     console.warn("Could not load addresses from shared folder, falling back to env variables", error);

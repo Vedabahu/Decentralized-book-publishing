@@ -67,9 +67,10 @@ pnpm --version
           sh '''
 echo "Starting deployment..."
 
-cp $ENV_FILE .env
+cp $ENV_FILE ./frontend/.env
 
 echo ".env file loaded"
+pwd
 ls -la .env
 
 docker compose down || true
