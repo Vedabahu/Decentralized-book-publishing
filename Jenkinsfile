@@ -1,6 +1,8 @@
 pipeline {
   agent none
+
   stages {
+
     stage('Test Backend') {
       agent {
         docker {
@@ -8,6 +10,7 @@ pipeline {
           args '-u root'
         }
       }
+
       stages {
         stage('Setup') {
           steps {
@@ -15,9 +18,10 @@ pipeline {
 corepack enable
 corepack prepare pnpm@latest --activate
 pnpm --version
-            '''
+'''
           }
         }
+
         stage('Install Dependencies') {
           steps {
             dir('backend') {
@@ -25,6 +29,7 @@ pnpm --version
             }
           }
         }
+
         stage('Compile Contracts') {
           steps {
             dir('backend') {
@@ -32,6 +37,7 @@ pnpm --version
             }
           }
         }
+
         stage('Run Tests') {
           steps {
             dir('backend') {
@@ -40,6 +46,7 @@ pnpm --version
           }
         }
       }
+
       post {
         success {
           echo 'Tests passed'
@@ -50,30 +57,34 @@ pnpm --version
       }
     }
 
-  stage('Deploy System') {
-    agent { label 'built-in' }
+    stage('Deploy System') {
+      agent { label 'built-in' }
 
-    steps {
-      withCredentials([file(credentialsId: '5a5508ad-b632-4a18-b5f2-c2875929d448', variable: 'ENV_FILE')]) {
-        sh '''
-  echo "Starting deployment..."
+      steps {
+        withCredentials([
+          file(credentialsId: '5a5508ad-b632-4a18-b5f2-c2875929d448', variable: 'ENV_FILE')
+        ]) {
+          sh '''
+echo "Starting deployment..."
 
-  # Copy the secret .env into workspace
-  cp $ENV_FILE .env
+cp $ENV_FILE .env
 
-  # Verify (optional, remove later)
-  echo ".env file loaded"
-  ls -la .env
+echo ".env file loaded"
+ls -la .env
 
-  # Deploy
-  docker compose down || true
-  docker compose up -d --build
+docker compose down || true
+docker compose up -d --build
 
-  echo "Deployment complete"
-  '''
+echo "Deployment complete"
+
+rm -f .env
+'''
+        }
       }
     }
+
   }
+
   post {
     success {
       echo 'Pipeline succeeded - system deployed'
