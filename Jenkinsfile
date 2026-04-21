@@ -1,9 +1,5 @@
 pipeline {
   agent none
-  environment {
-    PNPM_HOME = "/root/.local/share/pnpm"
-    PATH = "$PNPM_HOME:$PATH"
-  }
   stages {
     stage('Test Backend') {
       agent {
