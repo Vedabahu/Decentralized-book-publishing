@@ -73,6 +73,9 @@ echo ".env file loaded"
 pwd
 ls -la .env
 
+cp -r ./backend/artifacts ./shared
+ls -la ./shared
+
 docker compose down || true
 docker compose up -d --build
 
