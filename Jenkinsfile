@@ -71,7 +71,7 @@ cp $ENV_FILE ./frontend/.env
 
 echo ".env file loaded"
 pwd
-ls -la .env
+ls -la frontend
 
 cp -r ./backend/artifacts ./shared
 ls -la ./shared
@@ -80,8 +80,6 @@ docker compose down || true
 docker compose up -d --build
 
 echo "Deployment complete"
-
-rm -f .env
 '''
         }
       }
